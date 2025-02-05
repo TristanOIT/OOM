@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  app:
+    build: ./backend
+    command: flask run --host=0.0.0.0
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - DATABASE_URL=postgresql://postgres:password@db:5432/oom
+      - JWT_SECRET_KEY=your-secret-key-here
+    depends_on:
+      - db
+
+  db:
+    image: postgres:13-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=oom
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    stdin_open: true
+    tty: true
+
+volumes:
+  postgres_data:
